@@ -1,5 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import Dashboard from "./pages/dashboard";
+import { Route, Routes } from "react-router-dom";
+import LandingPage from "./pages/LandingPage";
+import Portfolio from "./pages/portfolio";
+import Login from "./components/authPage/Login";
+import Register from "./components/authPage/Register";
 
 
 
@@ -9,7 +14,16 @@ export default function App() {
     return (
         <div>
 
-            <Dashboard />
+            <Routes>
+                <Route path="/login" element={ <Login /> } />
+                <Route path="/register" element={ <Register /> } />
+
+                <Route path="/" element={ <LandingPage /> } />
+                <Route path="/dashboard" element={ <Dashboard /> } />
+
+
+                {/* <Route path="/port" element={ <Portfolio /> } /> */}
+            </Routes>
 
         </div>
     )

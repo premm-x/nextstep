@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { icons } from "./CodePreview";
 import { RotateCcw, Trash2 } from "lucide-react";
-import { JOBS_DATA } from "@/pages/Dashboard";
 
 
 
@@ -19,19 +18,19 @@ export function JobCard({ job, index, onDelete }) {
         <div className="flex items-center gap-3">
           {/* Logo */}
           <a
-            href={job.link} target="_blank" rel="noopener noreferrer"
+            href={job.url} target="_blank" rel="noopener noreferrer"
             className="w-10 h-10 rounded-xl flex items-center justify-center text-[15px] font-bold shrink-0 border border-white/10"
-            style={{ backgroundColor: job.logoColor, color: job.logoColor === "#ffffff" ? "#000" : "#fff" }}
+          // style={{ backgroundColor: job.logoColor, color: job.logoColor === "#ffffff" ? "#000" : "#fff" }}
           >
-            {job.logo}
+            {/* {job.logo} */} logo
           </a>
 
           <div>
-            <a href={job.link} target="_blank" rel="noopener noreferrer" className="text-[15px] font-semibold text-[#e8e8e8] leading-tight group-hover:text-white transition-colors">
-              {job.title} <span className="text-[12px] text-[#444] font-medium ml-1">{job.posted}</span>
+            <a href={job.url} target="_blank" rel="noopener noreferrer" className="text-[15px] font-semibold text-[#e8e8e8] leading-tight group-hover:text-white transition-colors">
+              {job.title} <span className="text-[12px] text-[#444] font-medium ml-1">{job.created_at}</span>
             </a>
             <div className="text-[13px] text-[#666] mt-0.5 ">
-              {job.company}
+              {job.company.name}
             </div>
           </div>
 
@@ -41,15 +40,15 @@ export function JobCard({ job, index, onDelete }) {
         <div className="gap-1 flex flex-col">
           <div className="flex items-center  gap-3 ">
             <span className="flex items-center gap-1 text-[11px] text-[#555]">
-              {icons.MapPinIcon}  {job.location}
+              {icons.MapPinIcon}  {job.location.display}
             </span>
             <span className="w-px h-3 bg-[#222]" />
             <span className="flex items-center gap-1 text-[11px] text-[#555]">
-              {icons.BriefcaseIcon}  {job.type}
+              {icons.BriefcaseIcon}  {job.employment?.contract_time}
             </span>
             <span className="w-px h-3 bg-[#222]" />
-            <span className="flex items-center gap-1 text-[11px] font-medium" style={{ color: job.accentColor }}>
-              {icons.DollarIcon}  {job.salary}
+            <span className="flex items-center gap-1 text-[11px] font-medium" > {/* style={{ color: job.accentColor }} */}
+              {icons.DollarIcon}  {job.salary?.max ?? "not disclose"}
             </span>
           </div>
 
@@ -97,7 +96,7 @@ export function JobCard({ job, index, onDelete }) {
 // let confirmJob = JOBS_DATA;
 let confirmJob = {};
 
-export function JobsPanel({ prompt, sendMessage }) {
+export function JobsPanel({ sendMessage, JOBS_DATA }) {
 
   const [jobs, setJobs] = useState(JOBS_DATA);
   const [deletedJobs, setDeletedJobs] = useState([]);
@@ -116,10 +115,14 @@ export function JobsPanel({ prompt, sendMessage }) {
 
   confirmJob = jobs
 
+  if (!jobs || Object.keys(jobs).length === 0) {
+    return;
+  }
+
   return (
     <div className="mt-4 space-y-3 bg-black p-2 rounded-2xl">
 
-      {jobs.map((job, i) => <JobCard key={job.id} job={job} index={i} onDelete={deleteJob} />)}
+      {jobs && jobs.map((job, i) => <JobCard key={job.id} job={job} index={i} onDelete={deleteJob} />)}
 
       <div className="flex items-center justify-between pr-2 py-2">
 
@@ -140,19 +143,22 @@ export function JobsPanel({ prompt, sendMessage }) {
 }
 
 
-export function ConfirmJobs({ sheetName }) {
+export function ConfirmJobs({ sheet }) {
 
   const [jobs, setJobs] = useState(confirmJob);
 
   function printToGoogleSheet() {
 
-    if(sheetName == ""){
+    if (!sheet || Object.keys(sheet).length === 0) {
       alert("Select sheet to update the data");
       return;
     }
 
-
-    fetch("https://script.google.com/macros/s/AKfycbzRhjbhulqcH0EN8PHVRigmzgC5uiWPdmEvNGlkTwfLHIE8gmI0PGAT1nYvnta2je8/exec", {
+    console.log(jobs)
+    console.log(sheet)
+    //https://script.google.com/macros/s/AKfycbwn6JFfa4gK3QdZpWkxYEwWlE30lyaJZt2SCvjcqCq6cXV16r8lHgtcpNcDAUrpkiYB/exec
+    //https://script.google.com/macros/s/AKfycbxHhAHsq9o__a7uUCxeS2i1VXGouZoBNCkpvAn8_ohV4s9kb7aLtZV71nutQ8kPzrtY/exec
+    fetch(sheet.link, {
       method: "POST",
       mode: "no-cors",   // 👈 important
       headers: {
@@ -179,19 +185,19 @@ export function ConfirmJobs({ sheetName }) {
                 ⬛
 
                 <a
-                  href={job.link} target="_blank" rel="noopener noreferrer"
+                  href={job.url} target="_blank" rel="noopener noreferrer"
                   className="w-8 h-8 rounded-xl flex items-center justify-center text-[15px] font-bold shrink-0 border border-white/10"
-                  style={{ backgroundColor: job.logoColor, color: job.logoColor === "#ffffff" ? "#000" : "#fff" }}
+                // style={{ backgroundColor: job.logoColor, color: job.logoColor === "#ffffff" ? "#000" : "#fff" }}
                 >
-                  {job.logo}
+                  {/* {job.logo} */} logo
                 </a>
 
                 <div className="flex gap-3">
-                  <a href={job.link} target="_blank" rel="noopener noreferrer" className="text-[12px] font-semibold text-[#e8e8e8] leading-tight group-hover:text-white transition-colors">
+                  <a href={job.url} target="_blank" rel="noopener noreferrer" className="text-[12px] font-semibold text-[#e8e8e8] leading-tight group-hover:text-white transition-colors">
                     {job.title}
                   </a>
                   <div className="text-[10px] text-[#666] mt-0.5 ">
-                    {job.company}
+                    {job.company.name}
                   </div>
                 </div>
 

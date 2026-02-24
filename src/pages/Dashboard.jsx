@@ -5,8 +5,9 @@ import TypingMessage from "@/Components/TypingMessage";
 import { icons } from "@/Components/CodePreview";
 import { ConfirmJobs, JobsPanel } from "@/components/Job";
 import { ChevronDown, ChevronRight, ExternalLink, List, Plus, Trash, X } from "lucide-react";
+import axios from "axios";
 
-export const JOBS_DATA = [
+const JOBS_DATA = [
 
     { id: 1, title: "Senior Frontend Engineer", company: "Vercel", logo: "V", logoColor: "#000000", accentColor: "#ffffff", location: "Remote · USA", type: "Full-time", salary: "$160k – $200k", tags: ["React", "Next.js", "TypeScript"], posted: "2d ago", description: "Join the team building the world's best frontend deployment platform. You'll work on core product features, improve DX, and collaborate with open-source communities worldwide.", link: "https://vercel.com/careers" },
     { id: 2, title: "UI/UX Designer", company: "Linear", logo: "L", logoColor: "#5e6ad2", accentColor: "#818cf8", location: "San Francisco, CA", type: "Full-time", salary: "$130k – $160k", tags: ["Figma", "Design Systems", "Prototyping"], posted: "1d ago", description: "Shape the future of project management tools. Own end-to-end design for new features, from early concepts to polished pixels with a team that cares deeply about craft.", link: "https://linear.app/careers" },
@@ -65,11 +66,11 @@ export default function Dashboard() {
     const bottomRef = useRef(null);
     const textareaRef = useRef(null);
 
-    const isHome = messages.length === 0;
+    let isHome = messages.length === 0;
 
     const [open, setOpen] = useState(false);
     const [openResume, setOpenResume] = useState(false);
-    const [sheetName, setSheetName] = useState("");
+    const [sheet, setsheet] = useState({});
     const [selectedResumeOption, setSelectedResumeOption] = useState("");
     const [selectedResumeOption2, setSelectedResumeOption2] = useState("");
     const dropdownRef = useRef(null);
@@ -77,11 +78,11 @@ export default function Dashboard() {
     const [openModel, setOpenModel] = useState(false);
     const [newmsg, setNewmsg] = useState(true);
 
+
+
     const [options, setOptions] = useState([
-        "Landing Page",
-        "Dashboard",
-        "E-commerce",
-        "Portfolio",
+        { sheetName: 'sample 1', link: 'https://script.google.com/macros/s/AKfycbwn6JFfa4gK3QdZpWkxYEwWlE30lyaJZt2SCvjcqCq6cXV16r8lHgtcpNcDAUrpkiYB/exec' },
+        { sheetName: 'sample 2', link: 'https://script.google.com/macros/s/AKfycbxHhAHsq9o__a7uUCxeS2i1VXGouZoBNCkpvAn8_ohV4s9kb7aLtZV71nutQ8kPzrtY/exec' }
     ]);
 
     const [optionsResume, setOptionsResume] = useState([
@@ -110,15 +111,37 @@ export default function Dashboard() {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages, isTyping]);
 
-    const sendMessage = (text, isApicall = true) => {
+    const sendMessage = async (text, isApicall = true) => {
 
+        isHome = false;
 
         const trimmed = text.trim();
         if (!trimmed || isTyping) return;
+        let aiText = "", userMsg = "", aiJobData = [];;
 
-        const userMsg = { role: "user", text: trimmed, id: Date.now() };
-        const aiText = AI_RESPONSES[trimmed] || AI_RESPONSES.default;
+        if (isApicall) {
 
+            userMsg = { role: "user", text: trimmed, id: Date.now() };
+            aiText = AI_RESPONSES[trimmed] || AI_RESPONSES.default;
+
+            const aiResponse = await axios.post("http://localhost:8000/chat", { message: text })
+            console.log(aiResponse);
+
+            const isGetJob = aiResponse.data.aiReply.isCall;
+
+
+            if (isGetJob) {
+                const skills = aiResponse.data.aiReply.skills
+
+                aiJobData = await axios.post("http://localhost:3000/job", { skills });
+            }
+            console.log(aiJobData)
+
+            if (!isGetJob) {
+                aiText = aiResponse.data.aiReply.aiText
+            }
+
+        }
 
         if (newmsg) {
             // Add to sidebar recents
@@ -130,12 +153,15 @@ export default function Dashboard() {
             setNewmsg(false);
         }
 
+        if (!isApicall) { userMsg = { role: "user", text: trimmed, id: Date.now() } }
+
         setMessages(prev => [...prev, userMsg]);
         setInput("");
         setIsTyping(true);
 
+
         setTimeout(() => {
-            const aiMsg = { role: "ai", text: aiText, id: Date.now() + 2, prompt: trimmed, isApicall };
+            const aiMsg = { role: "ai", text: aiText, jobData: aiJobData?.data?.data, id: Date.now() + 2, prompt: trimmed, isApicall };
             setMessages(prev => [...prev, aiMsg]);
             setIsTyping(false);
         }, 600);
@@ -174,7 +200,9 @@ export default function Dashboard() {
         });
 
     }
-    console.log(listOfResumes)
+    console.log(messages)
+    console.log(options)
+    console.log(sheet)
 
     return (
         <div className="flex h-screen w-full bg-[#0a0a0a] text-[#e5e5e5] font-sans text-sm overflow-hidden">
@@ -236,22 +264,29 @@ export default function Dashboard() {
                             </div>
                         </div>
 
-                        <p className="pl-2 pt-2 italic text-gray-400">sheet ( {sheetName} ) in used</p>
+                        <p className="pl-2 pt-2 italic text-gray-400">sheet ( {sheet?.sheetName} ) in used</p>
 
                         {/* Dropdown Menu */}
                         {open && (
                             <div className="absolute top-10 right-3 z-20 mt-2 p-1 bg-[#1a1a1a] border border-[#2e2e2e]  rounded-lg shadow-lg overflow-hidden">
                                 {options.map((item, i) => (
-                                    <button
-                                        key={i}
-                                        onClick={() => {
-                                            setSheetName((prev) => prev == item ? "" : item);
-                                            setOpen(false);
-                                        }}
-                                        className="block w-full rounded-lg  px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition"
-                                    >
-                                        {item}
-                                    </button>
+                                    <div key={i} className="flex items-center justify-between">
+                                        <button
+                                            onClick={() => {
+                                                setsheet((prev) => prev == item ? "" : item);
+                                                setOpen(false);
+                                            }}
+                                            className="block w-full rounded-lg  px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition"
+                                        >
+                                            {item.sheetName}
+                                        </button>
+
+                                        <button
+                                            className="rounded-lg whitespace-nowrap px-2 py-2 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition"
+                                        >
+                                            <Trash className="w-3.5 text-red-500" />
+                                        </button>
+                                    </div>
                                 ))}
                             </div>
                         )}
@@ -535,10 +570,17 @@ export default function Dashboard() {
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <div className="text-[13px] text-[#555] mb-1.5 font-medium">v0</div>
+
+                                                    <TypingMessage text={msg.prompt} />
+                                                    <br />
                                                     <TypingMessage text={msg.text} />
 
-                                                    {msg.isApicall ? <JobsPanel prompt={msg.prompt} sendMessage={sendMessage} />
-                                                        : <ConfirmJobs sheetName={sheetName} />}
+                                                    {msg.isApicall && <JobsPanel sendMessage={sendMessage} JOBS_DATA={msg.jobData} />}
+                                                    {!msg.isApicall && <ConfirmJobs sheet={sheet} />}
+
+                                                    <TypingMessage text={msg.prompt} />
+                                                    <br />
+                                                    <TypingMessage text={msg.text} />
 
                                                     {/* Action row */}
                                                     <div className="flex items-center gap-1 mt-3">
@@ -632,7 +674,7 @@ function AddSheetModal({ setOpenModel, setOptions }) {
         setForm({ sheetName: "", link: "" });
         setOpenModel(false);
 
-        setOptions((prev) => [form.sheetName, ...prev]);
+        setOptions((prev) => [form, ...prev]);
 
         console.log("Form Data:", form);
     };
@@ -709,7 +751,6 @@ function AddSheetModal({ setOpenModel, setOptions }) {
         </div>
     );
 }
-
 
 
 

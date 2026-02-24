@@ -1,8 +1,13 @@
+import { useState } from "react";
 import { icons } from "./CodePreview";
+import { LoaderCircle } from "lucide-react";
 
 
 export default function InputBox({ input, setInput, showUpgrade, setShowUpgrade, onSend, onKeyDown, textareaRef, compact }) {
     
+    const [loading, setLoading] = useState(false);
+
+
     return (
         <div className="w-full bg-[#111] border border-[#222] rounded-2xl overflow-hidden focus-within:border-[#333] transition-colors">
             <textarea
@@ -27,14 +32,14 @@ export default function InputBox({ input, setInput, showUpgrade, setShowUpgrade,
                     </button>
                 </div>
                 <button
-                    onClick={() => onSend(input)}
+                    onClick={() => {onSend(input); setLoading(true)}}
                     disabled={!input.trim()}
                     className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all active:scale-95 ${input.trim()
                         ? "bg-white text-black hover:bg-[#e8e8e8]"
                         : "bg-[#1a1a1a] text-[#444] cursor-not-allowed border border-[#2a2a2a]"
                         }`}
                 >
-                    {icons.ArrowUpIcon}
+                    {!loading ? icons.ArrowUpIcon : <LoaderCircle/>}
                 </button>
             </div>
 
