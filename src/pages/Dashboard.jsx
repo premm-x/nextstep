@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 // import CodePreview from "@/Components/CodePreview";
-import InputBox from "../Components/InputBox";
+import InputBox from "../components/InputBox";
 import TypingMessage from "../components/TypingMessage";
 import { icons } from "../components/CodePreview";
 import { ConfirmJobs, JobsPanel } from "../components/Job";
