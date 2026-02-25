@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import Dashboard from "./pages/dashboard";
+import Dashboard from "./pages/Dashboard";
 import { Route, Routes } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import Portfolio from "./pages/portfolio";
