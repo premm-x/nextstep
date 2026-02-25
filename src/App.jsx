@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import Dashboard from "./pages/Dashboard";
 import { Route, Routes } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
-import Portfolio from "./pages/portfolio";
+import Portfolio from "./pages/Portfolio";
 import Login from "./components/authPage/Login";
 import Register from "./components/authPage/Register";
 
