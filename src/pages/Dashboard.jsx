@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 // import CodePreview from "@/Components/CodePreview";
 import InputBox from "@/Components/InputBox";
-import TypingMessage from "@/Components/TypingMessage";
-import { icons } from "@/Components/CodePreview";
+import TypingMessage from "../components/TypingMessage";
+import { icons } from "../Components/CodePreview";
 import { ConfirmJobs, JobsPanel } from "@/components/Job";
 import { ChevronDown, ChevronRight, ExternalLink, List, Plus, Trash, X } from "lucide-react";
 import axios from "axios";
