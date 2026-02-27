@@ -10,6 +10,9 @@ export default function Register() {
     const [showPass, setShowPass] = useState(false);
     const isActive = email.length > 0 && password.length > 0;
 
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+
     const navigate = useNavigate();
 
     const submitHandler = async (e) => {
@@ -18,13 +21,20 @@ export default function Register() {
         try {
 
             const response = await axios.post("http://localhost:3000/user/login", { email, password });
+            console.log(response);
             console.log(response.data);
 
-            navigate("/dashboard")
+            navigate("/intro")
 
+            setLoading(false)
         }
         catch (error) {
-            console.log(error.response.data.message); // backend message
+
+            const errMsg = error.response.data.message;
+
+            console.log(errMsg); 
+            setError(errMsg)
+            setLoading(false)
         }
     };
 
@@ -38,12 +48,12 @@ export default function Register() {
 
             {/* ── CARD ── */}
             <div
-                className="w-full grid grid-cols-2 rounded-2xl overflow-hidden shadow-2xl p-2"
+                className="w-full grid grid-cols-1 md:grid-cols-2 rounded-2xl overflow-hidden shadow-2xl p-2"
             >
 
                 {/* ── LEFT PANEL ── */}
                 <div
-                    className="relative flex flex-col items-end  overflow-hidden rounded-2xl "
+                    className="hidden md:flex relative flex-col items-end  overflow-hidden rounded-2xl "
 
                 >
                     <img
@@ -77,7 +87,7 @@ export default function Register() {
 
 
                 {/* ── RIGHT PANEL ── */}
-                <div className="flex flex-col justify-center p-10 px-30 font-dm " >
+                <div className="flex flex-col justify-center p-10 md:px-30 font-dm " >
 
                     {/* Heading */}
                     <h1 className="font-syne text-2xl font-bold text-white tracking-tight mb-1">Welcome!</h1>
@@ -140,6 +150,7 @@ export default function Register() {
 
                         {/* Login Button */}
                         <button
+                            onClick={()=>{setLoading(true)}}
                             type="submit"
                             className={`w-full py-2.5 rounded-xl text-sm font-medium font-dm transition-all duration-200 ${isActive ? "text-white hover:-translate-y-0.5 bg-linear-to-br from-[#1561a0] to-[#0667c2]" : "text-white/25 cursor-default bg-neutral-950"
                                 }`}
@@ -147,14 +158,16 @@ export default function Register() {
                                 boxShadow: isActive ? "0 8px 24px rgba(43, 111, 179,0.3)" : "none",
                             }}
                         >
-                            Register
+                            { loading ? "..." : "Register"}
                         </button>
 
                     </form>
 
+                    <p className="text-red-500 text-center mt-1 text-[12px] font-extralight"> {error} </p>
+
                     {/* Sign Up */}
                     <p className="text-center text-xs text-white/30 mt-5">
-                        Don't have an account?{" "}
+                        Already have an account?{" "}
                         <Link to={'/login'} className="text-white/60 underline underline-offset-2 hover:text-violet-400 transition-colors">
                             Sign in
                         </Link>

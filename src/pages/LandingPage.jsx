@@ -116,7 +116,7 @@ export default function LandingPage() {
           <p className="hero-subtext animate-in delay-2">
             From skill analysis to job matching — make smarter career moves with AI.
           </p>
-          <div className="hero-actions animate-in delay-3">
+          <div className="hero-actions flex-col md:flex-row animate-in delay-3 ">
             <button className="btn-hero-primary">Get Started Free</button>
             <button className="btn-hero-secondary">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">

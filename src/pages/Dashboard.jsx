@@ -4,8 +4,13 @@ import InputBox from "../components/InputBox";
 import TypingMessage from "../components/TypingMessage";
 import { icons } from "../components/CodePreview";
 import { ConfirmJobs, JobsPanel } from "../components/Job";
-import { ChevronDown, ChevronRight, ExternalLink, List, Plus, Trash, X } from "lucide-react";
+import { ChevronDown, ChevronRight, ChevronsLeft, ExternalLink, List, Plus, Trash, X } from "lucide-react";
 import axios from "axios";
+import { ToastContainer, toast } from 'react-toastify';
+import { NLogo } from "@/components/landingPageComponent";
+import SheetGuide from "@/components/SheetGuide";
+
+
 
 const JOBS_DATA = [
 
@@ -77,7 +82,8 @@ export default function Dashboard() {
 
     const [openModel, setOpenModel] = useState(false);
     const [newmsg, setNewmsg] = useState(true);
-
+    
+    const [issheetGuideOpen, setIsSheetGuideOpen] = useState(false);
 
 
     const [options, setOptions] = useState([
@@ -205,26 +211,33 @@ export default function Dashboard() {
     console.log(sheet)
 
     return (
-        <div className="flex h-screen w-full bg-[#0a0a0a] text-[#e5e5e5] font-sans text-sm overflow-hidden">
+        <div className="relative flex h-screen w-full bg-[#0a0a0a] text-[#e5e5e5] font-sans text-sm overflow-hidden">
 
             {/* ── Sidebar ── */}
             <aside
-                className={`flex flex-col border-r border-[#1f1f1f]  transition-all duration-300 ease-in-out ${sidebarOpen ? "w-58 min-w-58" : "w-0 min-w-0 -translate-x-60"
-                    }`}
+                className={`absolute top-0 left-0 md:relative bg-black flex flex-col border-r border-[#1f1f1f]  transition-all duration-300 ease-in-out 
+                    ${sidebarOpen ? "w-58 min-w-58 h-full" : "w-0 min-w-0 -translate-x-60" }`}
             >
                 <div className="flex flex-col h-full w-58">
 
-                    {/* Workspace header */}
-                    <div className="flex items-center gap-2 px-3 pt-3 pb-2 shrink-0">
-                        <div className="w-7 h-7 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center shrink-0">
-                            {icons.V0Logo}
+                    <div className="flex items-center justify-between md:justify-center p-2">
+
+                        <div className="flex items-center  gap-1 px-3 py-4 pb-2 shrink-0">
+                            <div className="w-7 h-7 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center shrink-0">
+                                <NLogo /> 
+                            </div>
+                            <span className="text-[16px] font-bold text-[#e5e5e5] whitespace-nowrap">
+                                NexStep </span>
                         </div>
-                        <span className="text-[13px] font-semibold text-[#e5e5e5] whitespace-nowrap">Personal</span>
-                        <span className="text-[10px] text-[#666] bg-[#1a1a1a] border border-[#2a2a2a] rounded px-1.5 py-0.5 font-medium">Free</span>
-                        <button className="ml-auto text-[#555] hover:text-[#888] transition-colors shrink-0">
-                            {icons.ChevronDownIcon}
+
+                        <button
+                            onClick={() => setSidebarOpen(o => !o)}
+                            className="md:hidden text-[#555] hover:text-[#999] transition-colors p-1.5 rounded-md hover:bg-[#1a1a1a]"
+                        >
+                            <ChevronsLeft/>
                         </button>
                     </div>
+
 
                     {/* New Chat */}
                     <div className="px-2 pb-2 shrink-0 pt-3">
@@ -295,6 +308,12 @@ export default function Dashboard() {
                             <AddSheetModal setOpenModel={setOpenModel} setOptions={setOptions} />
                         )}
 
+                        <p 
+                        onClick={() => {setIsSheetGuideOpen(!issheetGuideOpen)}}
+                        className=" pt-4 hover:text-white cursor-pointer italic text-center text-gray-400">
+                            {"<click for guide to add sheet>"} </p>
+
+                        {issheetGuideOpen && <SheetGuide setIsSheetGuideOpen={setIsSheetGuideOpen} issheetGuideOpen={issheetGuideOpen} /> }
 
                     </div>
 
@@ -644,6 +663,8 @@ export default function Dashboard() {
                     </div>
                 )}
             </div>
+
+            <ToastContainer />
         </div>
     );
 }
