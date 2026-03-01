@@ -3,7 +3,8 @@ import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { GoogleIcon, AppleIcon, EyeIcon } from "@/components/icons"
 import { ToastContainer, toast } from 'react-toastify';
-import { UserContext } from "@/config/UserContext";
+import { UserContext } from "@/config/userContext";
+
 
 export default function Login() {
     const [email, setEmail] = useState("");

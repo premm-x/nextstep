@@ -5,6 +5,7 @@ import { GoogleIcon, AppleIcon, EyeIcon } from "@/components/icons"
 import { UserContext } from "@/config/userContext";
 
 
+
 export default function Register() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");

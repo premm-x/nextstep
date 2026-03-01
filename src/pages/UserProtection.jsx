@@ -1,4 +1,5 @@
-import { UserContext } from "@/config/UserContext";
+
+import { UserContext } from "@/config/userContext";
 import axios from "axios";
 import { useContext, useEffect } from "react";
 import { Navigate, Outlet } from "react-router-dom";
