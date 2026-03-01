@@ -144,7 +144,7 @@ export default function Dashboard() {
             if (isGetJob) {
                 const skills = aiResponse.data.aiReply.skills
 
-                aiJobData = await axios.post(`${import.meta.env.VITE_JS_URL}/job`, { skills });
+                aiJobData = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/job/getjobs`, { skills });
             }
             console.log(aiJobData)
 
@@ -593,15 +593,11 @@ export default function Dashboard() {
                                                 <div className="flex-1 min-w-0">
                                                     <div className="text-[13px] text-[#555] mb-1.5 font-medium">v0</div>
 
-                                                    <TypingMessage text={msg.prompt} />
-                                                    <br />
                                                     <TypingMessage text={msg.text} />
 
                                                     {msg.isApicall && <JobsPanel sendMessage={sendMessage} JOBS_DATA={msg.jobData} />}
                                                     {!msg.isApicall && <ConfirmJobs sheet={sheet} />}
 
-                                                    <TypingMessage text={msg.prompt} />
-                                                    <br />
                                                     <TypingMessage text={msg.text} />
 
                                                     {/* Action row */}
