@@ -1,5 +1,10 @@
-import React, { useState } from 'react';
+import { UserContext } from '@/config/userContext';
+import axios from 'axios';
+import React, { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { uploadResumeToCloudinary, uploadToCloudinary } from './uploadFile';
+
+
 
 export default function IntroPage() {
     const [step, setStep] = useState(1);
@@ -78,8 +83,8 @@ function NameStep({ formData, handleInputChange, handleNextStep }) {
                 />
             </div>
 
-            <button 
-                onClick={handleNextStep} 
+            <button
+                onClick={handleNextStep}
                 className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
             >
                 Next
@@ -91,12 +96,56 @@ function NameStep({ formData, handleInputChange, handleNextStep }) {
 function ResumeStep({ formData, handleFileChange, setStep }) {
 
     const navigate = useNavigate();
+    let resumeLink = null;
 
-    const submitHandler = ()=>{
-        console.log(formData)
+    const [addloading, setAddLoading] = useState(false);
+    const [skiploading, setSkipLoading] = useState(false);
 
-        navigate("/dashboard")
-    }
+    const [resumeName, setResumeName] = useState("");
+
+    const { userData, setUserData, setLoading } = useContext(UserContext)
+
+    const submitHandler = async (e) => {
+        e.preventDefault();
+
+        try {
+            const token = localStorage.getItem("token");
+
+            if (!token) {
+                setLoading(false);
+                return;
+            }
+
+            if (formData.resume)
+                resumeLink = await uploadResumeToCloudinary(formData.resume);
+
+            const finalName = resumeName?.trim() ? resumeName : "r1";
+
+            const response = await axios.put(`${import.meta.env.VITE_BACKEND_URL}/user/update`, {
+                email: userData.email,
+                username: formData.firstName,
+                resume: { url:resumeLink, name:finalName  }
+
+            }, { headers: { Authorization: `Bearer ${token}`, }, });
+
+            console.log('Profile updated successfully:');
+
+            setAddLoading(false)
+            setSkipLoading(false)
+
+            localStorage.setItem('token', response.data.token);
+            setLoading(false)
+            setUserData(response.data.user)
+
+            navigate("/dashboard")
+        }
+        catch (error) {
+
+            console.log(error);
+            setLoading(false)
+        }
+    };
+
 
     return (
         <div className="w-full max-w-md px-6 py-12">
@@ -123,26 +172,35 @@ function ResumeStep({ formData, handleFileChange, setStep }) {
                 />
             </div>
 
+            <input
+                id="resume-name"
+                type="text"
+                placeholder="Resume name"
+                value={resumeName}
+                onChange={(e) => { setResumeName(e.target.value); }}
+                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-8"
+            />
+
             <div className="flex gap-3">
-                <button 
-                    onClick={() => setStep(1)} 
+                <button
+                    onClick={() => setStep(1)}
                     className="flex-1 bg-gray-700 text-white py-2 rounded-lg font-semibold hover:bg-gray-600 transition"
                 >
                     ← Back
                 </button>
-                <button 
+                <button
                     disabled={formData.resume}
-                    onClick={() => {submitHandler()}} 
+                    onClick={(e) => { submitHandler(e); setSkipLoading(true) }}
                     className="flex-1 border border-gray-700 text-white py-2 rounded-lg font-semibold hover:bg-gray-800 transition disabled:text-gray-600 disabled:cursor-not-allowed"
                 >
-                    Skip
+                    {skiploading ? "..." : "Skip"}
                 </button>
-                <button 
-                    onClick={() => {submitHandler()}} 
+                <button
+                    onClick={(e) => { submitHandler(e); setAddLoading(true) }}
                     disabled={!formData.resume}
                     className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition disabled:bg-gray-700 disabled:cursor-not-allowed"
                 >
-                    Add
+                    {addloading ? "..." : "Add"}
                 </button>
             </div>
         </div>

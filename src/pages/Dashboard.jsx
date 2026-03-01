@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 // import CodePreview from "@/Components/CodePreview";
 import InputBox from "../components/InputBox";
 import TypingMessage from "../components/TypingMessage";
@@ -9,6 +9,8 @@ import axios from "axios";
 import { ToastContainer, toast } from 'react-toastify';
 import { NLogo } from "@/components/landingPageComponent";
 import SheetGuide from "@/components/SheetGuide";
+import { UserContext } from "@/config/userContext";
+import { uploadResumeToCloudinary } from "@/components/authPage/uploadFile";
 
 
 
@@ -55,7 +57,12 @@ const INITIAL_CHATS = [
 ];
 
 
+
+
+
 export default function Dashboard() {
+
+    const { userData, setUserData, userLogout, loading, setLoading } = useContext(UserContext)
 
     const [input, setInput] = useState("");
     const [showUpgrade, setShowUpgrade] = useState(true);
@@ -82,9 +89,11 @@ export default function Dashboard() {
 
     const [openModel, setOpenModel] = useState(false);
     const [newmsg, setNewmsg] = useState(true);
-    
+
     const [issheetGuideOpen, setIsSheetGuideOpen] = useState(false);
 
+
+    console.log(userData)
 
     const [options, setOptions] = useState([
         { sheetName: 'sample 1', link: 'https://script.google.com/macros/s/AKfycbwn6JFfa4gK3QdZpWkxYEwWlE30lyaJZt2SCvjcqCq6cXV16r8lHgtcpNcDAUrpkiYB/exec' },
@@ -95,10 +104,7 @@ export default function Dashboard() {
         "Add Resume",
         "Select Resume",
     ]);
-    const [listOfResumes, setListOfResumes] = useState([
-        { id: 1, name: "resume1", file: "file1" },
-        { id: 2, name: "resume2", file: "file2" },
-    ])
+    const [listOfResumes, setListOfResumes] = useState(userData.resumes)
 
     // Close when clicking outside
     useEffect(() => {
@@ -130,16 +136,15 @@ export default function Dashboard() {
             userMsg = { role: "user", text: trimmed, id: Date.now() };
             aiText = AI_RESPONSES[trimmed] || AI_RESPONSES.default;
 
-            const aiResponse = await axios.post("http://localhost:8000/chat", { message: text })
+            const aiResponse = await axios.post(`${import.meta.env.VITE_PYTHON_URL}/chat`, { message: text })
             console.log(aiResponse);
 
             const isGetJob = aiResponse.data.aiReply.isCall;
 
-
             if (isGetJob) {
                 const skills = aiResponse.data.aiReply.skills
 
-                aiJobData = await axios.post("http://localhost:3000/job", { skills });
+                aiJobData = await axios.post(`${import.meta.env.VITE_JS_URL}/job`, { skills });
             }
             console.log(aiJobData)
 
@@ -206,9 +211,7 @@ export default function Dashboard() {
         });
 
     }
-    console.log(messages)
-    console.log(options)
-    console.log(sheet)
+
 
     return (
         <div className="relative flex h-screen w-full bg-[#0a0a0a] text-[#e5e5e5] font-sans text-sm overflow-hidden">
@@ -216,7 +219,7 @@ export default function Dashboard() {
             {/* ── Sidebar ── */}
             <aside
                 className={`absolute top-0 left-0 md:relative bg-black flex flex-col border-r border-[#1f1f1f]  transition-all duration-300 ease-in-out 
-                    ${sidebarOpen ? "w-58 min-w-58 h-full" : "w-0 min-w-0 -translate-x-60" }`}
+                    ${sidebarOpen ? "w-58 min-w-58 h-full" : "w-0 min-w-0 -translate-x-60"}`}
             >
                 <div className="flex flex-col h-full w-58">
 
@@ -224,7 +227,7 @@ export default function Dashboard() {
 
                         <div className="flex items-center  gap-1 px-3 py-4 pb-2 shrink-0">
                             <div className="w-7 h-7 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center shrink-0">
-                                <NLogo /> 
+                                <NLogo />
                             </div>
                             <span className="text-[16px] font-bold text-[#e5e5e5] whitespace-nowrap">
                                 NexStep </span>
@@ -234,7 +237,7 @@ export default function Dashboard() {
                             onClick={() => setSidebarOpen(o => !o)}
                             className="md:hidden text-[#555] hover:text-[#999] transition-colors p-1.5 rounded-md hover:bg-[#1a1a1a]"
                         >
-                            <ChevronsLeft/>
+                            <ChevronsLeft />
                         </button>
                     </div>
 
@@ -308,12 +311,12 @@ export default function Dashboard() {
                             <AddSheetModal setOpenModel={setOpenModel} setOptions={setOptions} />
                         )}
 
-                        <p 
-                        onClick={() => {setIsSheetGuideOpen(!issheetGuideOpen)}}
-                        className=" pt-4 hover:text-white cursor-pointer italic text-center text-gray-400">
+                        <p
+                            onClick={() => { setIsSheetGuideOpen(!issheetGuideOpen) }}
+                            className=" pt-4 hover:text-white cursor-pointer italic text-center text-gray-400">
                             {"<click for guide to add sheet>"} </p>
 
-                        {issheetGuideOpen && <SheetGuide setIsSheetGuideOpen={setIsSheetGuideOpen} issheetGuideOpen={issheetGuideOpen} /> }
+                        {issheetGuideOpen && <SheetGuide setIsSheetGuideOpen={setIsSheetGuideOpen} issheetGuideOpen={issheetGuideOpen} />}
 
                     </div>
 
@@ -374,11 +377,11 @@ export default function Dashboard() {
                                             <Trash className="w-3.5 text-red-500" />
                                         </button>
 
-                                        <button
+                                        <a href={item.url} target="_blank"
                                             className="rounded-lg whitespace-nowrap px-2 py-2 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition"
                                         >
                                             <ExternalLink className="w-3.5 text-blue-500" />
-                                        </button>
+                                        </a>
 
                                     </div>
                                 )) :
@@ -521,12 +524,12 @@ export default function Dashboard() {
                             <span className="text-[#555]"> {icons.ClockIcon}  </span>
                             5.00
                         </button>
+                        <p>{userData.username}</p>
                         <div className="w-7 h-7 rounded-full bg-linear-to-br from-orange-400 to-orange-500 flex items-center justify-center text-white text-[11px] font-bold cursor-pointer ml-0.5">
-                            P
+                            {userData.username?.charAt(0).toUpperCase()}
                         </div>
                     </div>
                 </header>
-
 
                 {isHome ? (
 
@@ -672,7 +675,6 @@ export default function Dashboard() {
 
 
 
-
 function AddSheetModal({ setOpenModel, setOptions }) {
 
     const [form, setForm] = useState({
@@ -776,10 +778,16 @@ function AddSheetModal({ setOpenModel, setOptions }) {
 
 
 function AddResumeModal({ setSelectedResumeOption, setListOfResumes }) {
+    
+    const { userData, setUserData, setLoading  } = useContext(UserContext)
+    let resumeLink = null;
+
     const [form, setForm] = useState({
         ResumeName: "",
         file: null
     });
+
+    const [submitLoader, setSubmitLoader] = useState(false)
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -805,38 +813,70 @@ function AddResumeModal({ setSelectedResumeOption, setListOfResumes }) {
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!form.ResumeName.trim()) {
-            alert("Resume name is required");
-            return;
+        try {
+
+            if (!form.ResumeName.trim()) {
+                alert("Resume name is required");
+                return;
+            }
+
+            if (!form.file) {
+                alert("PDF file is required");
+                return;
+            }
+
+            const token = localStorage.getItem("token");
+
+            if (!token) {
+                setLoading(false);
+                return;
+            }
+
+            if (form.file)
+                resumeLink = await uploadResumeToCloudinary(form.file);
+
+            const response = await axios.put(`${import.meta.env.VITE_BACKEND_URL}/user/update`, {
+                email: userData.email,
+                resume: { url: resumeLink, name: form.ResumeName }
+            },  { headers: { Authorization: `Bearer ${token}`, }, });
+
+            
+            console.log('resume added successfully:');
+            console.log(response)
+            setUserData(response.data.user)
+
+            setSubmitLoader(false)
+
+            // Store structured resume object
+            setListOfResumes((prev) => [
+                {
+                    name: form.ResumeName,
+                    url: resumeLink
+                },
+                ...prev
+            ]);
+
+            // Reset form
+            setForm({
+                ResumeName: "",
+                file: null
+            });
+
+            // Close modal
+            setSelectedResumeOption("");
         }
 
-        if (!form.file) {
-            alert("PDF file is required");
-            return;
+        catch (error) {
+
+            console.log(error);
+            setSubmitLoader(false)
         }
 
-        // Store structured resume object
-        setListOfResumes((prev) => [
-            {
-                id: form.file.name,
-                name: form.ResumeName,
-                file: form.file
-            },
-            ...prev
-        ]);
-
-        // Reset form
-        setForm({
-            ResumeName: "",
-            file: null
-        });
-
-        // Close modal
-        setSelectedResumeOption("");
     };
+
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
@@ -897,10 +937,11 @@ function AddResumeModal({ setSelectedResumeOption, setListOfResumes }) {
                         </button>
 
                         <button
+                            onClick={() => setSubmitLoader(true)}
                             type="submit"
                             className="px-4 py-2 rounded-lg bg-white text-black text-sm hover:bg-zinc-200"
                         >
-                            Save
+                            {submitLoader ? "..." : "Save"}
                         </button>
                     </div>
 

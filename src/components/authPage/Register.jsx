@@ -1,7 +1,8 @@
 import axios from "axios";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { GoogleIcon, AppleIcon, EyeIcon } from "@/components/icons"
+import { UserContext } from "@/config/userContext";
 
 
 export default function Register() {
@@ -14,26 +15,25 @@ export default function Register() {
     const [error, setError] = useState("");
 
     const navigate = useNavigate();
+    const { userData, setUserData } = useContext(UserContext)
 
     const submitHandler = async (e) => {
         e.preventDefault();
 
         try {
 
-            const response = await axios.post("http://localhost:3000/user/login", { email, password });
-            console.log(response);
-            console.log(response.data);
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/user/register`, { email, password, });
 
+            setError('');
+            localStorage.setItem('token', response.data.token);
+            setLoading(false)
+            setUserData(response.data.user)
             navigate("/intro")
 
-            setLoading(false)
         }
         catch (error) {
-
-            const errMsg = error.response.data.message;
-
-            console.log(errMsg); 
-            setError(errMsg)
+            console.log(error);
+            // setError(error)
             setLoading(false)
         }
     };
@@ -87,7 +87,7 @@ export default function Register() {
 
 
                 {/* ── RIGHT PANEL ── */}
-                <div className="flex flex-col justify-center p-10 md:px-30 font-dm " >
+                <div className="flex flex-col justify-center p-10 lg:px-30 font-dm " >
 
                     {/* Heading */}
                     <h1 className="font-syne text-2xl font-bold text-white tracking-tight mb-1">Welcome!</h1>
@@ -150,7 +150,7 @@ export default function Register() {
 
                         {/* Login Button */}
                         <button
-                            onClick={()=>{setLoading(true)}}
+                            onClick={() => { setLoading(true) }}
                             type="submit"
                             className={`w-full py-2.5 rounded-xl text-sm font-medium font-dm transition-all duration-200 ${isActive ? "text-white hover:-translate-y-0.5 bg-linear-to-br from-[#1561a0] to-[#0667c2]" : "text-white/25 cursor-default bg-neutral-950"
                                 }`}
@@ -158,7 +158,7 @@ export default function Register() {
                                 boxShadow: isActive ? "0 8px 24px rgba(43, 111, 179,0.3)" : "none",
                             }}
                         >
-                            { loading ? "..." : "Register"}
+                            {loading ? "..." : "Register"}
                         </button>
 
                     </form>

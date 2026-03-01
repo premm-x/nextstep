@@ -7,6 +7,8 @@ import Login from "./components/authPage/Login";
 import Register from "./components/authPage/Register";
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import IntroPage from "./components/authPage/IntroPage";
+import NotFound from "./pages/NotFound";
+import UserProtection from "./pages/UserProtection";
 
 
 
@@ -16,16 +18,18 @@ export default function App() {
         <div>
 
             <Routes>
-                <Route path="/login" element={ <Login /> } />
-                <Route path="/register" element={ <Register /> } />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
 
-                <Route path="/" element={ <LandingPage /> } />
-                <Route path="/dashboard" element={ <Dashboard /> } />
+                <Route path="/" element={<LandingPage />} />
 
-                <Route path="/intro" element={ <IntroPage /> } />
+                <Route element={<UserProtection/>}>
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/intro" element={<IntroPage />} />
+                </Route>
 
+                <Route path="*" element={<NotFound />} />
 
-                {/* <Route path="/port" element={ <Portfolio /> } /> */}
             </Routes>
 
         </div>
