@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { icons } from "./CodePreview";
 import { RotateCcw, Trash2 } from "lucide-react";
-import { InterLoader } from "./Loader";
+import { InterLoader } from "./loader";
 
 
 
