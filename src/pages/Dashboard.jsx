@@ -4,13 +4,14 @@ import InputBox from "../components/InputBox";
 import TypingMessage from "../components/TypingMessage";
 import { icons } from "../components/CodePreview";
 import { ConfirmJobs, JobsPanel } from "../components/Job";
-import { ChevronDown, ChevronRight, ChevronsLeft, ExternalLink, List, Plus, Trash, X } from "lucide-react";
+import { ChevronDown, ChevronRight, ChevronsLeft, ExternalLink, HeartOff, List, MessageCircleHeart, Plus, Trash, X } from "lucide-react";
 import axios from "axios";
 import { ToastContainer, toast } from 'react-toastify';
 import { NLogo } from "@/components/landingPageComponent";
 import SheetGuide from "@/components/SheetGuide";
 import { UserContext } from "@/config/userContext";
 import { uploadResumeToCloudinary } from "@/components/authPage/uploadFile";
+import { RotatingUpwardTitle } from "@/components/homeTitle";
 
 
 
@@ -25,18 +26,15 @@ const JOBS_DATA = [
 ];
 
 const SAMPLE_PROMPTS = [
-    { icon: icons.SparkleIcon, label: "Landing page for a SaaS product" },
-    { icon: icons.CodeIcon, label: "Dashboard with charts & analytics" },
-    { icon: icons.ZapIcon, label: "E-commerce product card grid" },
-    { icon: icons.PaletteIcon, label: "Portfolio site with dark theme" },
+    { icon: icons.SparkleIcon, label: "Node.js API development jobs" },
+    { icon: icons.CodeIcon, label: "Java backend developer jobs" },
+    { icon: icons.ZapIcon, label: "Full-stack developer jobs" },
+    { icon: icons.PaletteIcon, label: "Fresher software developer jobs" },
 ];
 
 const AI_RESPONSES = {
-    default: "Here are 5 curated job openings that match your interest. Each role is from a top-tier tech company — click **Apply Now** to explore the full listing.",
-    "Landing page for a SaaS product": "Found 5 great roles focused on SaaS marketing, landing pages, and conversion. These teams are actively hiring right now.",
-    "Dashboard with charts & analytics": "Here are 5 data & analytics roles perfect for dashboard engineers and designers. All are remote-friendly.",
-    "E-commerce product card grid": "Here are 5 e-commerce and frontend roles with a focus on product UI. Great picks if you love building shopping experiences.",
-    "Portfolio site with dark theme": "These 5 creative and design-engineering roles would love someone who builds beautiful portfolio sites. Check them out!",
+    default: `Here are the job openings that match your interest. Each role is from a top-tier tech 
+    company — explore the full listing.`
 };
 
 const NAV_ITEMS = [
@@ -49,11 +47,7 @@ const NAV_ITEMS = [
 ];
 
 const INITIAL_CHATS = [
-    { id: 1, label: "dashboard clone" },
-    { id: 2, label: "Open in v0" },
-    { id: 3, label: "Open in v0" },
-    { id: 4, label: "Open in v0" },
-    { id: 5, label: "Open in v0" },
+    { id: 1, label: "sample", isfav: false },
 ];
 
 
@@ -62,7 +56,7 @@ const INITIAL_CHATS = [
 
 export default function Dashboard() {
 
-    const { userData, setUserData, userLogout, loading, setLoading } = useContext(UserContext)
+    const { userData, setUserData, userLogout } = useContext(UserContext)
 
     const [input, setInput] = useState("");
     const [showUpgrade, setShowUpgrade] = useState(true);
@@ -91,6 +85,7 @@ export default function Dashboard() {
     const [newmsg, setNewmsg] = useState(true);
 
     const [issheetGuideOpen, setIsSheetGuideOpen] = useState(false);
+    const [baseLoader, setBaseLoader] = useState(false);
 
 
     console.log(userData)
@@ -166,6 +161,7 @@ export default function Dashboard() {
 
         if (!isApicall) { userMsg = { role: "user", text: trimmed, id: Date.now() } }
 
+        setBaseLoader(false)
         setMessages(prev => [...prev, userMsg]);
         setInput("");
         setIsTyping(true);
@@ -181,6 +177,7 @@ export default function Dashboard() {
     const handleKeyDown = (e) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
+            setBaseLoader(true);
             sendMessage(input);
         }
     };
@@ -218,7 +215,7 @@ export default function Dashboard() {
 
             {/* ── Sidebar ── */}
             <aside
-                className={`absolute top-0 left-0 md:relative bg-black flex flex-col border-r border-[#1f1f1f]  transition-all duration-300 ease-in-out 
+                className={`absolute top-0 left-0 md:relative z-50 bg-black flex flex-col border-r border-[#1f1f1f]  transition-all duration-300 ease-in-out 
                     ${sidebarOpen ? "w-58 min-w-58 h-full" : "w-0 min-w-0 -translate-x-60"}`}
             >
                 <div className="flex flex-col h-full w-58">
@@ -446,8 +443,8 @@ export default function Dashboard() {
                                         </button>
 
 
-                                        <button onClick={() => removeToFavorate(chat)} className="w-4 h-4 rounded-full border border-[#2a2a2a] border-t-[#555] shrink-0" >
-                                            .
+                                        <button onClick={() => removeToFavorate(chat)} >
+                                            <HeartOff className="w-4 h-4 text-pink-800 cursor-pointer"/>
                                         </button>
 
                                     </div>
@@ -488,8 +485,8 @@ export default function Dashboard() {
                                         </button>
 
 
-                                        <button onClick={() => addToFavorate(chat)} className="w-4 h-4 rounded-full border border-[#2a2a2a] border-t-[#555] shrink-0" >
-                                            .
+                                        <button onClick={() => {addToFavorate(chat);}} >
+                                            <MessageCircleHeart className={`w-4 h-4 cursor-pointer ${chat.isfav ? "text-pink-800" : ""} `}/>
                                         </button>
 
                                     </div>
@@ -513,14 +510,14 @@ export default function Dashboard() {
                     </button>
 
                     <div className="flex items-center gap-2">
-                        <button className="flex items-center gap-1.5 px-3 py-1.5 border border-[#222] rounded-md text-[#888] hover:text-[#ccc] hover:border-[#333] transition-all text-[13px] font-medium">
+                        <button className="hidden md:flex items-center gap-1.5 px-3 py-1.5 border border-[#222] rounded-md text-[#888] hover:text-[#ccc] hover:border-[#333] transition-all text-[13px] font-medium">
                             Feedback
                         </button>
-                        <button className="flex items-center gap-1.5 px-3 py-1.5 border border-[#222] rounded-md text-[#888] hover:text-[#ccc] hover:border-[#333] transition-all text-[13px] font-medium">
+                        <button className="hidden md:flex items-center gap-1.5 px-3 py-1.5 border border-[#222] rounded-md text-[#888] hover:text-[#ccc] hover:border-[#333] transition-all text-[13px] font-medium">
                             <span className="text-[#555]"> {icons.GiftIcon}  </span>
                             Refer
                         </button>
-                        <button className="flex items-center gap-1.5 px-3 py-1.5 border border-[#222] rounded-md text-[#888] hover:text-[#ccc] hover:border-[#333] transition-all text-[13px]">
+                        <button className="hidden md:flex items-center gap-1.5 px-3 py-1.5 border border-[#222] rounded-md text-[#888] hover:text-[#ccc] hover:border-[#333] transition-all text-[13px]">
                             <span className="text-[#555]"> {icons.ClockIcon}  </span>
                             5.00
                         </button>
@@ -533,10 +530,10 @@ export default function Dashboard() {
 
                 {isHome ? (
 
-                    <main className="flex-1 flex flex-col items-center justify-center gap-7 px-5 overflow-auto">
+                    <main className="flex-1 flex flex-col items-center justify-end py-2 md:justify-center gap-7 px-5 overflow-auto">
 
-                        <h1 className="text-[42px] font-bold text-[#e8e8e8] tracking-tight text-center leading-tight m-0">
-                            What do you want to create?
+                        <h1 className="text-[42px] mb-15 md:mb-10 py-5 font-bold text-[#e8e8e8] tracking-tight text-center leading-tight m-0">
+                            <RotatingUpwardTitle/>
                         </h1>
 
 
@@ -549,16 +546,18 @@ export default function Dashboard() {
                                 onSend={sendMessage}
                                 onKeyDown={handleKeyDown}
                                 textareaRef={textareaRef}
+                                setLoading={setBaseLoader}
+                                loading={baseLoader}
                             />
                         </div>
 
 
-                        <div className="flex items-center gap-2 flex-wrap justify-center">
+                        <div className="flex items-center gap-2 flex-wrap justify-center mb-5 md:mb-0">
                             {SAMPLE_PROMPTS.map(({ icon, label }) => (
                                 <button
                                     key={label}
                                     onClick={() => setInput(label)}
-                                    className="flex items-center gap-2 px-4 py-1.75 border border-[#222] rounded-full text-[#888] text-[13px] font-medium hover:border-[#383838] hover:text-[#ccc] hover:bg-[#111] transition-all"
+                                    className="flex items-center gap-2 px-4 py-1.75 border border-[#222] rounded-full text-[#888] text-[11px] md:text-[13px] font-medium hover:border-[#383838] hover:text-[#ccc] hover:bg-[#111] transition-all"
                                 >
                                     <span className="text-[#555]">{icon}</span>
                                     {label}
@@ -587,18 +586,15 @@ export default function Dashboard() {
                                         ) : (
                                             /* AI response */
                                             <div className="flex gap-3">
-                                                <div className="w-7 h-7 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center shrink-0 mt-0.5">
-                                                    {icons.V0Logo}
+                                                <div className="w-7 h-7 text-stone-400 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center shrink-0 mt-0.5">
+                                                    Ai
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <div className="text-[13px] text-[#555] mb-1.5 font-medium">v0</div>
 
                                                     <TypingMessage text={msg.text} />
 
                                                     {msg.isApicall && <JobsPanel sendMessage={sendMessage} JOBS_DATA={msg.jobData} />}
                                                     {!msg.isApicall && <ConfirmJobs sheet={sheet} />}
-
-                                                    <TypingMessage text={msg.text} />
 
                                                     {/* Action row */}
                                                     <div className="flex items-center gap-1 mt-3">
@@ -656,6 +652,8 @@ export default function Dashboard() {
                                     onKeyDown={handleKeyDown}
                                     textareaRef={textareaRef}
                                     compact
+                                    setLoading={setBaseLoader}
+                                    loading={baseLoader}
                                 />
                             </div>
                         </div>
@@ -774,8 +772,8 @@ function AddSheetModal({ setOpenModel, setOptions }) {
 
 
 function AddResumeModal({ setSelectedResumeOption, setListOfResumes }) {
-    
-    const { userData, setUserData, setLoading  } = useContext(UserContext)
+
+    const { userData, setUserData, setLoading } = useContext(UserContext)
     let resumeLink = null;
 
     const [form, setForm] = useState({
@@ -837,9 +835,9 @@ function AddResumeModal({ setSelectedResumeOption, setListOfResumes }) {
             const response = await axios.put(`${import.meta.env.VITE_BACKEND_URL}/user/update`, {
                 email: userData.email,
                 resume: { url: resumeLink, name: form.ResumeName }
-            },  { headers: { Authorization: `Bearer ${token}`, }, });
+            }, { headers: { Authorization: `Bearer ${token}`, }, });
 
-            
+
             console.log('resume added successfully:');
             console.log(response)
             setUserData(response.data.user)

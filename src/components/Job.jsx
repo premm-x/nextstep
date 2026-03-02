@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { icons } from "./CodePreview";
 import { RotateCcw, Trash2 } from "lucide-react";
+import { InterLoader } from "./Loader";
 
 
 
@@ -14,7 +15,7 @@ export function JobCard({ job, index, onDelete }) {
       style={{ animationDelay: `${index * 80}ms` }}
     >
       {/* Top row */}
-      <div className="flex items-start justify-between gap-2 mb-2">
+      <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-2 mb-2">
         <div className="flex items-center gap-3">
           {/* Logo */}
           <a
@@ -36,45 +37,47 @@ export function JobCard({ job, index, onDelete }) {
 
         </div>
 
-        {/* Meta row */}
-        <div className="gap-1 flex flex-col">
-          <div className="flex items-center  gap-3 ">
-            <span className="flex items-center gap-1 text-[11px] text-[#555]">
-              {icons.MapPinIcon}  {job.location.display}
-            </span>
-            <span className="w-px h-3 bg-[#222]" />
-            <span className="flex items-center gap-1 text-[11px] text-[#555]">
-              {icons.BriefcaseIcon}  {job.employment?.contract_time}
-            </span>
-            <span className="w-px h-3 bg-[#222]" />
-            <span className="flex items-center gap-1 text-[11px] font-medium" > {/* style={{ color: job.accentColor }} */}
-              {icons.DollarIcon}  {job.salary?.max ?? "not disclose"}
-            </span>
+        <div className="flex items-center justify-center gap-1.5">
+          {/* Meta row */}
+          <div className="gap-1 flex flex-col">
+            <div className="flex items-center gap-1.5 md:gap-3 ">
+              <span className="flex items-center gap-1 text-[11px] text-[#555]">
+                {icons.MapPinIcon}  {job.location.display}
+              </span>
+              <span className="w-px h-3 bg-[#222]" />
+              <span className="flex items-center gap-1 text-[11px] text-[#555]">
+                {icons.BriefcaseIcon}  {job.employment?.contract_time}
+              </span>
+              <span className="w-px h-3 bg-[#222]" />
+              <span className="flex items-center gap-1 text-[11px] font-medium" > {/* style={{ color: job.accentColor }} */}
+                {icons.DollarIcon}  {job.salary?.max ?? "not disclose"}
+              </span>
+            </div>
+
+
           </div>
 
-          {/* <div className="flex items-center gap-1.5 flex-wrap">
-            {job.tags.map(tag => (
-              <span key={tag} className="px-1 bg-[#1a1a1a] border border-[#252525] rounded-md text-[11px] text-[#777] font-medium">
-                {tag}
-              </span>
-            ))}
-          </div> */}
-        </div>
+          {/* Right: posted + save */}
+          <div className="flex items-center gap-2 shrink-0">
 
-        {/* Right: posted + save */}
-        <div className="flex items-center gap-2 shrink-0">
-
-          <button
-            onClick={() => onDelete(job.id)}
-            className={` rounded-lg transition-all text-[#444] hover:text-[#888] hover:bg-[#1a1a1a]`}
-          >
-            <Trash2 className="w-4" />
-          </button>
+            <button
+              onClick={() => onDelete(job.id)}
+              className={` rounded-lg transition-all text-[#444] hover:text-[#888] hover:bg-[#1a1a1a]`}
+            >
+              <Trash2 className="w-4" />
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Description */}
-      <p className="text-[13px] text-[#777] leading-relaxed c ne-clamp-2">{job.description}</p>
+      <p className="text-[13px] text-[#777] leading-relaxed c ne-clamp-2">
+        {
+          job.description.split(" ").length > 40
+            ? job.description.split(" ").slice(0, 40).join(" ") + "..."
+            : job.description
+        }
+      </p>
 
       {/* Tags + Apply */}
       {/* <div className="flex items-center justify-between gap-2">
@@ -128,14 +131,14 @@ export function JobsPanel({ sendMessage, JOBS_DATA }) {
 
         <button
           onClick={() => restoreAll()}
-          className="flex items-center gap-2 px-5 py-2 bg-blue-500 border rounded-full text-[#000000] text-[13px] font-medium hover:bg-blue-700 transition-all duration-250">
+          className="flex cursor-pointer items-center gap-2 px-5 py-2 bg-blue-500 border rounded-full text-[#000000] text-[13px] font-medium hover:bg-blue-700 transition-all duration-250">
           Restore <RotateCcw className="w-3.5" />
         </button>
 
         <button
           onClick={() => sendMessage("I confirmed this list of job's", false)}
-          className="flex items-center gap-2 px-5 py-2 bg-green-500 border rounded-full text-[#000000] text-[13px] font-medium hover:bg-green-700 transition-all duration-250">
-          Done {icons.ArrowRightIcon}
+          className="flex cursor-pointer items-center gap-2 px-5 py-2 bg-green-500 border rounded-full text-[#000000] text-[13px] font-medium hover:bg-green-700 transition-all duration-250">
+          Confirm {icons.ArrowRightIcon}
         </button>
       </div>
     </div>
@@ -146,6 +149,8 @@ export function JobsPanel({ sendMessage, JOBS_DATA }) {
 export function ConfirmJobs({ sheet }) {
 
   const [jobs, setJobs] = useState(confirmJob);
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState("Print in sheet");
 
   function printToGoogleSheet() {
 
@@ -153,6 +158,7 @@ export function ConfirmJobs({ sheet }) {
       alert("Select sheet to update the data");
       return;
     }
+    setStatus("...")
 
     console.log(jobs)
     console.log(sheet)
@@ -166,12 +172,12 @@ export function ConfirmJobs({ sheet }) {
       },
       body: JSON.stringify(jobs),
     })
-      .then(() => console.log("Sent"))
+      .then(() => {console.log("Sent"); setStatus("Done!"); })
       .catch(err => console.error(err));
   }
 
   return (
-    <div className="bg-black px-4 py-3 w-1/2 rounded-2xl">
+    <div className="bg-black px-4 py-3 w-full md:w-1/2 rounded-2xl">
 
       {
         jobs.map((job, i) => (
@@ -179,9 +185,9 @@ export function ConfirmJobs({ sheet }) {
             key={i}
             className=" bg-[#111] border border-[#1e1e1e] rounded-xl p-1 mb-2 hover:border-[#2e2e2e] hover:bg-[#141414] transition-all duration-200"
           >
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex items-center gap-3">
+            <div className="flex items-center justify-start md:justify-start gap-2">
 
+              <div className="flex items-center justify-center gap-1">
                 ⬛
 
                 <a
@@ -191,17 +197,18 @@ export function ConfirmJobs({ sheet }) {
                 >
                   {/* {job.logo} */} logo
                 </a>
-
-                <div className="flex gap-3">
-                  <a href={job.url} target="_blank" rel="noopener noreferrer" className="text-[12px] font-semibold text-[#e8e8e8] leading-tight group-hover:text-white transition-colors">
-                    {job.title}
-                  </a>
-                  <div className="text-[10px] text-[#666] mt-0.5 ">
-                    {job.company.name}
-                  </div>
-                </div>
-
               </div>
+
+              <div className="flex gap-3">
+                <a href={job.url} target="_blank" rel="noopener noreferrer" className="text-[12px] font-semibold text-[#e8e8e8] leading-tight group-hover:text-white transition-colors">
+                  {job.title}
+                </a>
+                <div className="text-[10px] text-[#666] mt-0.5 ">
+                  {job.company.name}
+                </div>
+              </div>
+
+
             </div>
 
           </div>
@@ -210,12 +217,15 @@ export function ConfirmJobs({ sheet }) {
 
       <div className="w-full flex items-center justify-end ">
         <button
-          onClick={() => printToGoogleSheet()}
-          className="flex items-center mt-2 gap-2 px-5 py-2 bg-green-500 border rounded-full text-[#000000] text-[13px] font-medium hover:bg-green-700 transition-all duration-250">
-          Confirm {icons.ArrowRightIcon}
+          disabled={ status == "Done!" }
+          onClick={() => {printToGoogleSheet(); }}
+          className="flex items-center disabled:bg-gray-400 cursor-pointer mt-2 gap-2 px-5 py-2 bg-green-500 border rounded-full text-[#000000] text-[13px] font-medium hover:bg-green-700 transition-all duration-250">
+            {status == "..." ? <InterLoader/> : status}
         </button>
       </div>
 
     </div>
   )
 }
+
+
