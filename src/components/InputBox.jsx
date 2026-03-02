@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { icons } from "./CodePreview";
 import { LoaderCircle } from "lucide-react";
-import { OuterLoader } from "./Loader";
+import { OuterLoader } from "./loader";
 
 
 
