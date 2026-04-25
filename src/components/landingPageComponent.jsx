@@ -1327,28 +1327,41 @@ export const NLogo = () => (
 );
 
 export const GALLERY_IMAGES = [
-    { bg: "linear-gradient(135deg, #0f1729, #1a2b4a)", label: "SaaS Dashboard" },
-    { bg: "linear-gradient(135deg, #1a0a2e, #2d1b4e)", label: "Portfolio" },
-    { bg: "linear-gradient(135deg, #0a1f0a, #1a3a1a)", label: "E-commerce" },
-    { bg: "linear-gradient(135deg, #2a1a0a, #4a2d0a)", label: "Agency" },
-    { bg: "linear-gradient(135deg, #1a1a2e, #2d2d4e)", label: "Tech Startup" },
-    { bg: "linear-gradient(135deg, #2e0a0a, #4e1a1a)", label: "Blog" },
-    { bg: "linear-gradient(135deg, #0a2a2a, #1a4a4a)", label: "Creative Studio" },
-    { bg: "linear-gradient(135deg, #2a0a2a, #4a1a4a)", label: "Mobile App" },
+    { bg: "linear-gradient(135deg, #0f1729, #1a2b4a)", label: "SaaS Dashboard", image: "/agency.jpg" },
+    { bg: "linear-gradient(135deg, #1a0a2e, #2d1b4e)", label: "Portfolio", image: "/portfolio.jpg" },
+    { bg: "linear-gradient(135deg, #0a1f0a, #1a3a1a)", label: "E-commerce", image: "/ecom.jpg" },
+    { bg: "linear-gradient(135deg, #2a1a0a, #4a2d0a)", label: "Agency", image: "/agency.jpg" },
+    { bg: "linear-gradient(135deg, #2e0a0a, #4e1a1a)", label: "Blog", image: "/blog.jpg" },
+    { bg: "linear-gradient(135deg, #2a0a2a, #4a1a4a)", label: "Mobile App", image: "/mob.jpg" },
+    { bg: "linear-gradient(135deg, #1a1a2e, #2d2d4e)", label: "Tech Startup", image: "/agency.jpg" },
+    { bg: "linear-gradient(135deg, #0a2a2a, #1a4a4a)", label: "Creative Studio", image: "/studio.jpg" },
 ];
 
 export const GALLERY_ROW_2 = [
-    { bg: "linear-gradient(135deg, #0d1b2a, #1e3a5f)", label: "Consulting" },
-    { bg: "linear-gradient(135deg, #1a2e0a, #2e4a1a)", label: "Fintech" },
-    { bg: "linear-gradient(135deg, #2e2a0a, #4e421a)", label: "Healthcare" },
-    { bg: "linear-gradient(135deg, #0a2e2a, #1a4e42)", label: "Education" },
-    { bg: "linear-gradient(135deg, #2a0a1a, #4a1a2e)", label: "Media" },
-    { bg: "linear-gradient(135deg, #1a0a2e, #3a1a4e)", label: "NFT" },
-    { bg: "linear-gradient(135deg, #0a1a2e, #1a2e4e)", label: "Analytics" },
-    { bg: "linear-gradient(135deg, #2a1a0a, #4a2e1a)", label: "Social" },
+    { bg: "linear-gradient(135deg, #0d1b2a, #1e3a5f)", label: "Consulting", image: "/consulting.jpg" },
+    { bg: "linear-gradient(135deg, #1a2e0a, #2e4a1a)", label: "Fintech", image: "/fin.jpg" },
+    { bg: "linear-gradient(135deg, #2e2a0a, #4e421a)", label: "Healthcare", image: "/doctor.jpg" },
+    { bg: "linear-gradient(135deg, #0a2e2a, #1a4e42)", label: "Education", image: "/edu.jpg" },
+    { bg: "linear-gradient(135deg, #2a0a1a, #4a1a2e)", label: "Media", image: "/media.jpg" },
+    { bg: "linear-gradient(135deg, #1a0a2e, #3a1a4e)", label: "NFT", image: "/trading.jpg" },
+    { bg: "linear-gradient(135deg, #0a1a2e, #1a2e4e)", label: "Analytics", image: "/analytics.jpg" },
+    { bg: "linear-gradient(135deg, #2a1a0a, #4a2e1a)", label: "Social", image: "/social.jpg" },
 ];
 
-export const GalleryCard = ({ bg, label }) => (
+export const GalleryCard = ({ bg, label, image }) => (
+    <div className="gallery-card">
+        <div style={{ width: "100%", height: "100%", background: bg, display: "flex", flexDirection: "column", position: "relative", overflow: "hidden"}}>
+            <img src={image} alt="" />
+            <div className="z-10" style={{ position: "absolute", bottom: "12px", right: "12px", background: "rgba(0,85,255,0.3)", borderRadius: "6px", padding: "4px 10px", fontSize: "10px", color: "#6699ff", fontWeight: 600 }}>
+                {label}
+            </div>
+            <div className="bg-black opacity-[0.4] w-full h-full absolute top-0 left-0"></div>
+        </div>
+        <div className="gallery-overlay" />
+    </div>
+);
+
+export const GalleryCardOlderVersion_Website_Like = ({ bg, label }) => (
     <div className="gallery-card">
         <div style={{ width: "100%", height: "100%", background: bg, display: "flex", flexDirection: "column", position: "relative", overflow: "hidden", padding: "16px" }}>
             {/* Mock website layout */}
